@@ -1,0 +1,102 @@
+name: push
+
+on: push
+
+permissions: # Explicitly declare minimal required permissions
+  id-token: write
+  contents: read
+
+jobs:
+  checkov:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Checkov GitHub Action
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          # This will add both a CLI output to the console and create a results.sarif file
+          output_format: cli,sarif
+          output_file_path: console,results.sarif
+    
+  format:
+    needs: checkov
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+  terraform-validate:
+    needs: format
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::291847254387:role/GithHub_ThreeTierArch
+          role-session-name: GitHub_ThreeTierArch
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Validate
+        run: terraform validate
+
+  terraform-plan:
+    needs: terraform-validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::291847254387:role/GithHub_ThreeTierArch
+          role-session-name: GitHub_ThreeTierArch
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Plan
+        run: terraform plan -out=plan.tfplan
+        env:
+          TF_LOG: DEBUG
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan.tfplan
+          path: .
+
+  terraform-apply:
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::291847254387:role/GithHub_ThreeTierArch
+          role-session-name: GitHub_ThreeTierArch
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: plan.tfplan
+          path: .
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Apply
+        run: terraform apply plan.tfplan
+        env:
+          TF_LOG: DEBUG
