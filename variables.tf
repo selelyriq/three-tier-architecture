@@ -2,7 +2,11 @@ variable "instance_type" {
   type = string
 }
 
-variable "ami_id" {
+variable "frontend_ami_id" {
+  type = string
+}
+
+variable "backend_ami_id" {
   type = string
 }
 
@@ -40,10 +44,6 @@ variable "frontend_tags" {
 
 variable "backend_tags" {
   type = map(string)
-}
-
-variable "user_data" {
-  type = string
 }
 
 variable "frontend_ami_id" {

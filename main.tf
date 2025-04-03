@@ -10,7 +10,6 @@ module "Frontend" {
   ami_id            = var.frontend_ami_id
   subnet_id         = aws_subnet.PublicSubnet.id
   name              = var.frontend_name
-  user_data         = var.user_data
   tags              = var.frontend_tags
   security_group_id = aws_security_group.FrontendSG.id
 }
@@ -98,7 +97,6 @@ module "Backend" {
   ami_id            = var.backend_ami_id
   subnet_id         = aws_subnet.PrivateSubnet.id
   name              = var.backend_name
-  user_data         = var.user_data
   tags              = var.backend_tags
   security_group_id = aws_security_group.BackendSG.id
 }
