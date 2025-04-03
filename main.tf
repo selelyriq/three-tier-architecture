@@ -4,15 +4,22 @@
 #Frontend
 ################################################
 
+# Create the user data scripts using templatefile function
+locals {
+  frontend_user_data = templatefile("${path.module}/templates/frontend.sh.tpl", {})
+  backend_user_data = templatefile("${path.module}/templates/backend.sh.tpl", {})
+}
+
 module "Frontend" {
-  source            = "git::https://github.com/selelyriq/TF-EC2.git?ref=b9a04d59deb2f6085ed684bcdabb9ee35aa16987"
-  instance_type     = var.instance_type
-  ami_id            = var.frontend_ami_id
-  subnet_id         = aws_subnet.PublicSubnet.id
-  name              = var.frontend_name
-  user_data         = var.user_data
-  tags              = var.frontend_tags
-  security_group_id = aws_security_group.FrontendSG.id
+  source              = "git::https://github.com/selelyriq/TF-EC2.git?ref=02299c74c3cb5610580b08de9579b82ba3b436c5"
+  instance_type       = var.instance_type
+  ami_id              = var.frontend_ami_id
+  subnet_id           = aws_subnet.PublicSubnet.id
+  name                = var.frontend_name
+  user_data           = local.frontend_user_data
+  tags                = var.frontend_tags
+  security_group_id   = aws_security_group.FrontendSG.id
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 }
 
 resource "aws_vpc" "ThreeTierAppVPC" {
@@ -93,14 +100,15 @@ resource "aws_security_group_rule" "FrontendSGEgress" {
 ################################################
 
 module "Backend" {
-  source            = "git::https://github.com/selelyriq/TF-EC2.git?ref=b9a04d59deb2f6085ed684bcdabb9ee35aa16987"
-  instance_type     = var.instance_type
-  ami_id            = var.backend_ami_id
-  subnet_id         = aws_subnet.PrivateSubnet.id
-  name              = var.backend_name
-  user_data         = var.user_data
-  tags              = var.backend_tags
-  security_group_id = aws_security_group.BackendSG.id
+  source              = "git::https://github.com/selelyriq/TF-EC2.git?ref=02299c74c3cb5610580b08de9579b82ba3b436c5"
+  instance_type       = var.instance_type
+  ami_id              = var.backend_ami_id
+  subnet_id           = aws_subnet.PrivateSubnet.id
+  name                = var.backend_name
+  user_data           = local.backend_user_data
+  tags                = var.backend_tags
+  security_group_id   = aws_security_group.BackendSG.id
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 }
 
 resource "aws_subnet" "PrivateSubnet" {
@@ -111,8 +119,24 @@ resource "aws_subnet" "PrivateSubnet" {
   }
 }
 
+# Create Elastic IP for NAT Gateway
+resource "aws_eip" "nat_eip" {
+  domain = "vpc"
+
+  tags = {
+    Name = "NAT Gateway EIP"
+  }
+
+  depends_on = [aws_internet_gateway.IGW]
+}
+
 resource "aws_nat_gateway" "NAT" {
-  subnet_id = aws_subnet.PublicSubnet.id
+  subnet_id     = aws_subnet.PublicSubnet.id
+  allocation_id = aws_eip.nat_eip.id
+
+  # Add explicit dependency on the Internet Gateway
+  depends_on = [aws_internet_gateway.IGW]
+
   tags = {
     Name = "NAT"
   }
@@ -164,13 +188,16 @@ resource "aws_security_group_rule" "BackendSGEgress" {
 ################################################
 
 module "Database" {
-  source            = "git::https://github.com/selelyriq/TF-RDS.git?ref=dd5e96928d53949fe58d7e1d3bf7999fc38fbfbe"
-  identifier        = var.identifier
-  engine            = var.engine
-  instance_class    = var.instance_class
-  allocated_storage = var.allocated_storage
-  username          = var.username
-  tags              = var.database_tags
+  source                    = "git::https://github.com/selelyriq/TF-RDS.git?ref=84d120180868a1ec2a11c3affcddde41796e66bc"
+  identifier                = var.identifier
+  engine                    = var.engine
+  instance_class           = var.instance_class
+  allocated_storage        = var.allocated_storage
+  username                 = var.username
+  tags                     = var.database_tags
+  skip_final_snapshot      = true
+  final_snapshot_identifier = "three-tier-app-final-snapshot"  # Provide a valid name even though we're skipping
+  snapshot_identifier      = null
 }
 
 resource "aws_security_group" "DatabaseSG" {
@@ -300,6 +327,50 @@ resource "aws_flow_log" "vpc_flow_logs" {
   log_destination = aws_cloudwatch_log_group.flow_logs.arn
   traffic_type    = var.flow_logs_traffic_type
   vpc_id          = aws_vpc.ThreeTierAppVPC.id
+}
+
+# Create IAM role for EC2 instances
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_discovery_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Create IAM policy for EC2 discovery
+resource "aws_iam_role_policy" "ec2_discovery_policy" {
+  name = "ec2_discovery_policy"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "rds:DescribeDBInstances"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Create instance profile
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_discovery_profile"
+  role = aws_iam_role.ec2_role.name
 }
 
 
