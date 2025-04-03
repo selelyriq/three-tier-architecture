@@ -51,7 +51,7 @@ resource "aws_route_table_association" "PublicRTAssociation" {
 
 resource "aws_security_group" "FrontendSG" {
   name        = "FrontendSG"
-  description = "Security group for the frontend"
+  description = var.frontend_sg_description
   vpc_id      = aws_vpc.ThreeTierAppVPC.id
 }
 
@@ -71,6 +71,17 @@ resource "aws_security_group_rule" "FrontendSGIngressHTTPS" {
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.FrontendSG.id
+}
+
+# Frontend egress - needs internet access for updates and responses
+resource "aws_security_group_rule" "FrontendSGEgress" {
+  type              = "egress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.FrontendSG.id
+  description       = "Allow HTTPS outbound traffic for updates and responses"
 }
 
 ###############################################################################################################################
@@ -119,7 +130,7 @@ resource "aws_route_table_association" "PrivateRTAssociation" {
 
 resource "aws_security_group" "BackendSG" {
   name        = "BackendSG"
-  description = "Security group for the backend"
+  description = var.backend_sg_description
   vpc_id      = aws_vpc.ThreeTierAppVPC.id
 }
 
@@ -132,13 +143,15 @@ resource "aws_security_group_rule" "BackendSGIngress" {
   security_group_id        = aws_security_group.BackendSG.id
 }
 
+# Backend egress - only needs to talk to the database
 resource "aws_security_group_rule" "BackendSGEgress" {
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.BackendSG.id
+  type                     = "egress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.DatabaseSG.id
+  security_group_id        = aws_security_group.BackendSG.id
+  description             = "Allow MySQL traffic to database tier"
 }
 
 ###############################################################################################################################
@@ -159,7 +172,7 @@ module "Database" {
 
 resource "aws_security_group" "DatabaseSG" {
   name        = "DatabaseSG"
-  description = "Security group for the database"
+  description = var.database_sg_description
   vpc_id      = aws_vpc.ThreeTierAppVPC.id
 }
 
@@ -172,13 +185,70 @@ resource "aws_security_group_rule" "DatabaseSGIngress" {
   security_group_id        = aws_security_group.DatabaseSG.id
 }
 
+# Database egress - only needs to respond to backend
 resource "aws_security_group_rule" "DatabaseSGEgress" {
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.DatabaseSG.id
+  type                     = "egress"
+  from_port                = 1024
+  to_port                  = 65535
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.BackendSG.id
+  security_group_id        = aws_security_group.DatabaseSG.id
+  description             = "Allow response traffic to backend tier"
+}
+
+# Create CloudWatch Log Group for VPC Flow Logs
+resource "aws_cloudwatch_log_group" "flow_logs" {
+  name              = "/aws/vpc/flow-logs/${aws_vpc.ThreeTierAppVPC.id}"
+  retention_in_days = var.flow_logs_retention_days
+}
+
+# Create IAM Role for VPC Flow Logs
+resource "aws_iam_role" "vpc_flow_logs_role" {
+  name = "vpc-flow-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Create IAM Policy for VPC Flow Logs
+resource "aws_iam_role_policy" "vpc_flow_logs_policy" {
+  name = "vpc-flow-logs-policy"
+  role = aws_iam_role.vpc_flow_logs_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Effect = "Allow"
+        Resource = "${aws_cloudwatch_log_group.flow_logs.arn}:*"
+      }
+    ]
+  })
+}
+
+# Enable VPC Flow Logs
+resource "aws_flow_log" "vpc_flow_logs" {
+  iam_role_arn    = aws_iam_role.vpc_flow_logs_role.arn
+  log_destination = aws_cloudwatch_log_group.flow_logs.arn
+  traffic_type    = var.flow_logs_traffic_type
+  vpc_id          = aws_vpc.ThreeTierAppVPC.id
 }
 
 

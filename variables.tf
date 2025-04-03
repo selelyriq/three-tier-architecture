@@ -61,3 +61,33 @@ variable "database_tags" {
 variable "allocated_storage" {
   type = number
 }
+
+variable "frontend_sg_description" {
+  type        = string
+  description = "Description for the frontend security group"
+  default     = "Security group for frontend web servers - allows inbound HTTP/HTTPS traffic from internet"
+}
+
+variable "backend_sg_description" {
+  type        = string
+  description = "Description for the backend security group"
+  default     = "Security group for backend application servers - allows inbound HTTP traffic from frontend only"
+}
+
+variable "database_sg_description" {
+  type        = string
+  description = "Description for the database security group"
+  default     = "Security group for RDS database - allows inbound MySQL traffic from backend servers only"
+}
+
+variable "flow_logs_retention_days" {
+  type        = number
+  description = "Number of days to retain VPC Flow Logs in CloudWatch"
+  default     = 30
+}
+
+variable "flow_logs_traffic_type" {
+  type        = string
+  description = "Type of traffic to log. Valid values: ACCEPT, REJECT, ALL"
+  default     = "ALL"
+}
