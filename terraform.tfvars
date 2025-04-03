@@ -3,9 +3,9 @@
 #Frontend
 ################################################
 
-instance_type = "t2.micro"
-ami_id        = "ami-07f63a768d21af353"
-frontend_name = "Frontend"
+instance_type   = "t2.micro"
+frontend_ami_id = "ami-07f63a768d21af353"
+frontend_name   = "Frontend"
 frontend_tags = {
   Name        = "Frontend"
   Environment = "Production"
