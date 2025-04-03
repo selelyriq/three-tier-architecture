@@ -10,10 +10,6 @@ variable "backend_name" {
   type = string
 }
 
-variable "subnet_id" {
-  type = string
-}
-
 variable "identifier" {
   type = string
 }
