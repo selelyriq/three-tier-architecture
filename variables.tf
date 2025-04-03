@@ -250,13 +250,13 @@ EOF
 variable "snapshot_identifier" {
   type        = string
   description = "The name of the snapshot to create before destroying the RDS instance"
-  default     = null  # or a specific name if you want to use snapshots
+  default     = null # or a specific name if you want to use snapshots
 }
 
 variable "final_snapshot_identifier" {
   type        = string
   description = "The name of the final snapshot when destroying the RDS instance"
-  default     = null  # This is fine since we're skipping final snapshots
+  default     = null # This is fine since we're skipping final snapshots
 }
 
 variable "skip_final_snapshot" {

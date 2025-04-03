@@ -7,18 +7,18 @@
 # Create the user data scripts using templatefile function
 locals {
   frontend_user_data = templatefile("${path.module}/templates/frontend.sh.tpl", {})
-  backend_user_data = templatefile("${path.module}/templates/backend.sh.tpl", {})
+  backend_user_data  = templatefile("${path.module}/templates/backend.sh.tpl", {})
 }
 
 module "Frontend" {
-  source              = "git::https://github.com/selelyriq/TF-EC2.git?ref=02299c74c3cb5610580b08de9579b82ba3b436c5"
-  instance_type       = var.instance_type
-  ami_id              = var.frontend_ami_id
-  subnet_id           = aws_subnet.PublicSubnet.id
-  name                = var.frontend_name
-  user_data           = local.frontend_user_data
-  tags                = var.frontend_tags
-  security_group_id   = aws_security_group.FrontendSG.id
+  source               = "git::https://github.com/selelyriq/TF-EC2.git?ref=02299c74c3cb5610580b08de9579b82ba3b436c5"
+  instance_type        = var.instance_type
+  ami_id               = var.frontend_ami_id
+  subnet_id            = aws_subnet.PublicSubnet.id
+  name                 = var.frontend_name
+  user_data            = local.frontend_user_data
+  tags                 = var.frontend_tags
+  security_group_id    = aws_security_group.FrontendSG.id
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 }
 
@@ -100,14 +100,14 @@ resource "aws_security_group_rule" "FrontendSGEgress" {
 ################################################
 
 module "Backend" {
-  source              = "git::https://github.com/selelyriq/TF-EC2.git?ref=02299c74c3cb5610580b08de9579b82ba3b436c5"
-  instance_type       = var.instance_type
-  ami_id              = var.backend_ami_id
-  subnet_id           = aws_subnet.PrivateSubnet.id
-  name                = var.backend_name
-  user_data           = local.backend_user_data
-  tags                = var.backend_tags
-  security_group_id   = aws_security_group.BackendSG.id
+  source               = "git::https://github.com/selelyriq/TF-EC2.git?ref=02299c74c3cb5610580b08de9579b82ba3b436c5"
+  instance_type        = var.instance_type
+  ami_id               = var.backend_ami_id
+  subnet_id            = aws_subnet.PrivateSubnet.id
+  name                 = var.backend_name
+  user_data            = local.backend_user_data
+  tags                 = var.backend_tags
+  security_group_id    = aws_security_group.BackendSG.id
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 }
 
@@ -191,13 +191,13 @@ module "Database" {
   source                    = "git::https://github.com/selelyriq/TF-RDS.git?ref=84d120180868a1ec2a11c3affcddde41796e66bc"
   identifier                = var.identifier
   engine                    = var.engine
-  instance_class           = var.instance_class
-  allocated_storage        = var.allocated_storage
-  username                 = var.username
-  tags                     = var.database_tags
-  skip_final_snapshot      = true
-  final_snapshot_identifier = "three-tier-app-final-snapshot"  # Provide a valid name even though we're skipping
-  snapshot_identifier      = null
+  instance_class            = var.instance_class
+  allocated_storage         = var.allocated_storage
+  username                  = var.username
+  tags                      = var.database_tags
+  skip_final_snapshot       = true
+  final_snapshot_identifier = "three-tier-app-final-snapshot" # Provide a valid name even though we're skipping
+  snapshot_identifier       = null
 }
 
 resource "aws_security_group" "DatabaseSG" {
