@@ -188,7 +188,7 @@ resource "aws_security_group_rule" "BackendSGEgress" {
 ################################################
 
 module "Database" {
-  source                    = "git::https://github.com/selelyriq/TF-RDS.git?ref=84d120180868a1ec2a11c3affcddde41796e66bc"
+  source                    = "git::https://github.com/selelyriq/TF-RDS.git?ref=b9de02b5ba3dbab58507a473e550ca6ad6ac4344"
   identifier                = var.identifier
   engine                    = var.engine
   instance_class            = var.instance_class
