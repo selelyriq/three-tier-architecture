@@ -2,14 +2,6 @@ variable "instance_type" {
   type = string
 }
 
-variable "frontend_ami_id" {
-  type = string
-}
-
-variable "backend_ami_id" {
-  type = string
-}
-
 variable "frontend_name" {
   type = string
 }
@@ -102,4 +94,11 @@ variable "kms_deletion_window" {
   type        = number
   description = "Duration in days after which the KMS key is deleted after destruction of the resource"
   default     = 7
+}
+
+variable "user_data" {
+  type    = string
+  default = <<EOF
+echo "Hello, World!" > /var/www/html/index.html
+EOF
 }
