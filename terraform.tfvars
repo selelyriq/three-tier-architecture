@@ -39,3 +39,10 @@ database_tags = {
   Project     = "ThreeTierApp"
 }
 
+################################################
+#Security Groups
+################################################
+
+frontend_sg_description = "Allow inbound HTTP/HTTPS traffic from internet"
+backend_sg_description = "Allow inbound HTTP traffic from frontend only"
+database_sg_description = "Allow inbound MySQL traffic from backend servers only"

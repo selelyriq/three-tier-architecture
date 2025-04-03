@@ -91,3 +91,15 @@ variable "flow_logs_traffic_type" {
   description = "Type of traffic to log. Valid values: ACCEPT, REJECT, ALL"
   default     = "ALL"
 }
+
+variable "frontend_https_description" {
+  type        = string
+  description = "Description for the frontend HTTPS ingress rule"
+  default     = "Allow inbound HTTPS traffic from internet"
+}
+
+variable "kms_deletion_window" {
+  type        = number
+  description = "Duration in days after which the KMS key is deleted after destruction of the resource"
+  default     = 7
+}

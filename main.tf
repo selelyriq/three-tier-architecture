@@ -5,13 +5,14 @@
 ################################################
 
 module "Frontend" {
-  source        = "git::https://github.com/selelyriq/TF-EC2.git?ref=4a0558b9616c6bbbc99ac870a1f0f2929ffe8c7a"
-  instance_type = var.instance_type
-  ami_id        = var.frontend_ami_id
-  subnet_id     = aws_subnet.PublicSubnet.id
-  name          = var.frontend_name
-  user_data     = var.user_data
-  tags          = var.frontend_tags
+  source           = "git::https://github.com/selelyriq/TF-EC2.git?ref=b9a04d59deb2f6085ed684bcdabb9ee35aa16987"
+  instance_type    = var.instance_type
+  ami_id           = var.frontend_ami_id
+  subnet_id        = aws_subnet.PublicSubnet.id
+  name             = var.frontend_name
+  user_data        = var.user_data
+  tags             = var.frontend_tags
+  security_group_id = aws_security_group.FrontendSG.id
 }
 
 resource "aws_vpc" "ThreeTierAppVPC" {
@@ -71,6 +72,7 @@ resource "aws_security_group_rule" "FrontendSGIngressHTTPS" {
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.FrontendSG.id
+  description       = var.frontend_https_description
 }
 
 # Frontend egress - needs internet access for updates and responses
@@ -91,13 +93,14 @@ resource "aws_security_group_rule" "FrontendSGEgress" {
 ################################################
 
 module "Backend" {
-  source        = "git::https://github.com/selelyriq/TF-EC2.git?ref=4a0558b9616c6bbbc99ac870a1f0f2929ffe8c7a"
-  instance_type = var.instance_type
-  ami_id        = var.backend_ami_id
-  subnet_id     = aws_subnet.PrivateSubnet.id
-  name          = var.backend_name
-  user_data     = var.user_data
-  tags          = var.backend_tags
+  source           = "git::https://github.com/selelyriq/TF-EC2.git?ref=b9a04d59deb2f6085ed684bcdabb9ee35aa16987"
+  instance_type    = var.instance_type
+  ami_id           = var.backend_ami_id
+  subnet_id        = aws_subnet.PrivateSubnet.id
+  name             = var.backend_name
+  user_data        = var.user_data
+  tags             = var.backend_tags
+  security_group_id = aws_security_group.BackendSG.id
 }
 
 resource "aws_subnet" "PrivateSubnet" {
@@ -196,10 +199,58 @@ resource "aws_security_group_rule" "DatabaseSGEgress" {
   description             = "Allow response traffic to backend tier"
 }
 
-# Create CloudWatch Log Group for VPC Flow Logs
+# Create KMS key for CloudWatch Logs encryption
+resource "aws_kms_key" "cloudwatch_log_key" {
+  description             = "KMS key for CloudWatch Logs encryption"
+  deletion_window_in_days = var.kms_deletion_window
+  enable_key_rotation     = true
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Enable IAM User Permissions"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow CloudWatch Logs"
+        Effect = "Allow"
+        Principal = {
+          Service = "logs.${data.aws_region.current.name}.amazonaws.com"
+        }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:Describe*"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Add KMS key alias
+resource "aws_kms_alias" "cloudwatch_log_key_alias" {
+  name          = "alias/cloudwatch-log-key"
+  target_key_id = aws_kms_key.cloudwatch_log_key.key_id
+}
+
+# Get current AWS account ID and region
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+# Update CloudWatch Log Group to use KMS encryption
 resource "aws_cloudwatch_log_group" "flow_logs" {
   name              = "/aws/vpc/flow-logs/${aws_vpc.ThreeTierAppVPC.id}"
   retention_in_days = var.flow_logs_retention_days
+  kms_key_id       = aws_kms_key.cloudwatch_log_key.arn
 }
 
 # Create IAM Role for VPC Flow Logs
