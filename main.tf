@@ -5,13 +5,13 @@
 ################################################
 
 module "Frontend" {
-  source           = "git::https://github.com/selelyriq/TF-EC2.git?ref=b9a04d59deb2f6085ed684bcdabb9ee35aa16987"
-  instance_type    = var.instance_type
-  ami_id           = var.frontend_ami_id
-  subnet_id        = aws_subnet.PublicSubnet.id
-  name             = var.frontend_name
-  user_data        = var.user_data
-  tags             = var.frontend_tags
+  source            = "git::https://github.com/selelyriq/TF-EC2.git?ref=b9a04d59deb2f6085ed684bcdabb9ee35aa16987"
+  instance_type     = var.instance_type
+  ami_id            = var.frontend_ami_id
+  subnet_id         = aws_subnet.PublicSubnet.id
+  name              = var.frontend_name
+  user_data         = var.user_data
+  tags              = var.frontend_tags
   security_group_id = aws_security_group.FrontendSG.id
 }
 
@@ -93,13 +93,13 @@ resource "aws_security_group_rule" "FrontendSGEgress" {
 ################################################
 
 module "Backend" {
-  source           = "git::https://github.com/selelyriq/TF-EC2.git?ref=b9a04d59deb2f6085ed684bcdabb9ee35aa16987"
-  instance_type    = var.instance_type
-  ami_id           = var.backend_ami_id
-  subnet_id        = aws_subnet.PrivateSubnet.id
-  name             = var.backend_name
-  user_data        = var.user_data
-  tags             = var.backend_tags
+  source            = "git::https://github.com/selelyriq/TF-EC2.git?ref=b9a04d59deb2f6085ed684bcdabb9ee35aa16987"
+  instance_type     = var.instance_type
+  ami_id            = var.backend_ami_id
+  subnet_id         = aws_subnet.PrivateSubnet.id
+  name              = var.backend_name
+  user_data         = var.user_data
+  tags              = var.backend_tags
   security_group_id = aws_security_group.BackendSG.id
 }
 
@@ -154,7 +154,7 @@ resource "aws_security_group_rule" "BackendSGEgress" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.DatabaseSG.id
   security_group_id        = aws_security_group.BackendSG.id
-  description             = "Allow MySQL traffic to database tier"
+  description              = "Allow MySQL traffic to database tier"
 }
 
 ###############################################################################################################################
@@ -196,7 +196,7 @@ resource "aws_security_group_rule" "DatabaseSGEgress" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.BackendSG.id
   security_group_id        = aws_security_group.DatabaseSG.id
-  description             = "Allow response traffic to backend tier"
+  description              = "Allow response traffic to backend tier"
 }
 
 # Create KMS key for CloudWatch Logs encryption
@@ -204,7 +204,7 @@ resource "aws_kms_key" "cloudwatch_log_key" {
   description             = "KMS key for CloudWatch Logs encryption"
   deletion_window_in_days = var.kms_deletion_window
   enable_key_rotation     = true
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -250,7 +250,7 @@ data "aws_region" "current" {}
 resource "aws_cloudwatch_log_group" "flow_logs" {
   name              = "/aws/vpc/flow-logs/${aws_vpc.ThreeTierAppVPC.id}"
   retention_in_days = var.flow_logs_retention_days
-  kms_key_id       = aws_kms_key.cloudwatch_log_key.arn
+  kms_key_id        = aws_kms_key.cloudwatch_log_key.arn
 }
 
 # Create IAM Role for VPC Flow Logs
@@ -287,7 +287,7 @@ resource "aws_iam_role_policy" "vpc_flow_logs_policy" {
           "logs:DescribeLogGroups",
           "logs:DescribeLogStreams"
         ]
-        Effect = "Allow"
+        Effect   = "Allow"
         Resource = "${aws_cloudwatch_log_group.flow_logs.arn}:*"
       }
     ]
