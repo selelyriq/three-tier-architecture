@@ -391,21 +391,36 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 #Monitoring
 ################################################
 
+# Create CloudWatch Log Group for Cost Allocation Tags
+resource "aws_cloudwatch_log_group" "cost_allocation_tag_log_group" {
+  name              = "/custom/three-tier-app/cost-allocation"
+  retention_in_days = var.retention_in_days
+  tags              = var.cloudwatch_tags
+}
 
-module "CloudWatch" {
-  source              = "git::https://github.com/selelyriq/TF-Monitoring.git?ref=29b084088b51a69884bc754ca1240e3a7d3a5891"
-  name                = var.name
-  pattern             = var.pattern
-  metric_name         = var.metric_name
-  namespace           = "Custom/ThreeTierApp"
-  value               = var.value
+# Create CloudWatch Metric Filter for Cost Allocation Tags
+resource "aws_cloudwatch_log_metric_filter" "cost_allocation_tag_filter" {
+  name           = var.name
+  pattern        = var.pattern
+  log_group_name = aws_cloudwatch_log_group.cost_allocation_tag_log_group.name
+
+  metric_transformation {
+    name      = var.metric_name
+    namespace = "Custom/ThreeTierApp"
+    value     = var.value
+  }
+
+  depends_on = [aws_cloudwatch_log_group.cost_allocation_tag_log_group]
+}
+
+# Create CloudWatch Alarm for Cost Allocation Tags
+resource "aws_cloudwatch_metric_alarm" "cost_allocation_tag_alarm" {
   alarm_name          = var.alarm_name
   comparison_operator = var.comparison_operator
   evaluation_periods  = var.evaluation_periods
   threshold           = var.threshold
   statistic           = var.statistic
-  period              = 300                                      # 5 minutes in seconds
-  log_group_name      = "/custom/three-tier-app/cost-allocation" # Using a different log group name
-  retention_in_days   = var.retention_in_days
-  tags                = var.cloudwatch_tags
+  metric_name         = var.metric_name
+  namespace           = "Custom/ThreeTierApp"
+  period              = 300 # 5 minutes in seconds
 }
