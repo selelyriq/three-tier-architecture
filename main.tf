@@ -19,7 +19,8 @@ module "Frontend" {
   user_data            = local.frontend_user_data
   tags                 = var.frontend_tags
   security_group_id    = aws_security_group.FrontendSG.id
-  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile = aws_iam_role_policy.ec2_discovery_policy.name
+
 }
 
 resource "aws_vpc" "ThreeTierAppVPC" {
@@ -108,7 +109,7 @@ module "Backend" {
   user_data            = local.backend_user_data
   tags                 = var.backend_tags
   security_group_id    = aws_security_group.BackendSG.id
-  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile = aws_iam_role_policy.ec2_discovery_policy.name
 }
 
 resource "aws_subnet" "PrivateSubnet" {
@@ -347,7 +348,7 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
-# Create IAM policy for EC2 discovery
+# Update IAM policy for EC2 to include both discovery and CloudWatch permissions
 resource "aws_iam_role_policy" "ec2_discovery_policy" {
   name = "ec2_discovery_policy"
   role = aws_iam_role.ec2_role.id
@@ -359,7 +360,15 @@ resource "aws_iam_role_policy" "ec2_discovery_policy" {
         Effect = "Allow"
         Action = [
           "ec2:DescribeInstances",
-          "rds:DescribeDBInstances"
+          "rds:DescribeDBInstances",
+          "cloudwatch:PutMetricData",
+          "cloudwatch:GetMetricData",
+          "cloudwatch:GetMetricStatistics",
+          "cloudwatch:ListMetrics",
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams"
         ]
         Resource = "*"
       }
@@ -367,12 +376,30 @@ resource "aws_iam_role_policy" "ec2_discovery_policy" {
   })
 }
 
-# Create instance profile
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_discovery_profile"
-  role = aws_iam_role.ec2_role.name
+# Add CloudWatch Agent policy attachment to the existing EC2 role
+resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+################################################
+#Monitoring
+################################################
 
 
-
+module "CloudWatch" {
+  source              = "git::https://github.com/selelyriq/TF-Monitoring.git?ref=0f1366dcd24eb79a78d56b247e44e6b7446afc87"
+  name                = var.name
+  pattern             = var.pattern
+  metric_name         = var.metric_name
+  namespace           = var.namespace
+  value               = var.value
+  alarm_name          = var.alarm_name
+  comparison_operator = var.comparison_operator
+  evaluation_periods  = var.evaluation_periods
+  threshold           = var.threshold
+  statistic           = var.statistic
+  log_group_name      = aws_cloudwatch_log_group.flow_logs.name
+  retention_in_days   = var.retention_in_days
+  tags                = var.cloudwatch_tags
+}
