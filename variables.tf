@@ -167,10 +167,6 @@ variable "statistic" {
   type = string
 }
 
-variable "instance_profile_name" {
-  type = string
-}
-
 variable "log_group_name" {
   type = string
 }
