@@ -404,8 +404,8 @@ module "CloudWatch" {
   evaluation_periods  = var.evaluation_periods
   threshold           = var.threshold
   statistic           = var.statistic
-  period              = 300  # 5 minutes in seconds
-  log_group_name      = "/custom/three-tier-app/cost-allocation"  # Using a different log group name
+  period              = 300                                      # 5 minutes in seconds
+  log_group_name      = "/custom/three-tier-app/cost-allocation" # Using a different log group name
   retention_in_days   = var.retention_in_days
   tags                = var.cloudwatch_tags
 }
