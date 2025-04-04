@@ -138,7 +138,9 @@ variable "metric_name" {
 }
 
 variable "namespace" {
-  type = string
+  description = "The namespace for CloudWatch metrics"
+  type        = string
+  default     = "Custom/ThreeTierApp"
 }
 
 variable "value" {
@@ -179,4 +181,10 @@ variable "retention_in_days" {
 
 variable "cloudwatch_tags" {
   type = map(string)
+}
+
+variable "period" {
+  type        = number
+  description = "The period in seconds over which the metric is evaluated"
+  default     = 300 # 5 minutes
 }

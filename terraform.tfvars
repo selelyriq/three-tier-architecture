@@ -1,4 +1,3 @@
-
 ################################################
 #Frontend
 ################################################
@@ -51,19 +50,17 @@ database_sg_description = "Allow inbound MySQL traffic from backend servers only
 #CloudWatch
 ################################################
 
-name                  = "CloudWatch"
-pattern               = ""
-metric_name           = "CostAllocationTag"
-namespace             = "AWS/Billing"
-value                 = "CostAllocationTag"
-alarm_name            = "CostAllocationTagAlarm"
-comparison_operator   = "GreaterThanThreshold"
-evaluation_periods    = 1
-threshold             = 10
-statistic             = "Sum"
-instance_profile_name = "ec2_cloudwatch_profile"
-log_group_name        = "flow_logs"
-retention_in_days     = 30
+name                = "CloudWatch"
+pattern             = ""
+metric_name         = "CostAllocationTag"
+namespace           = "ThreeTierApp/Metrics"
+value               = "CostAllocationTag"
+alarm_name          = "CostAllocationTagAlarm"
+comparison_operator = "GreaterThanThreshold"
+evaluation_periods  = 1
+threshold           = 10
+statistic           = "Sum"
+period              = 300
 cloudwatch_tags = {
   Name        = "CloudWatch"
   Environment = "Production"

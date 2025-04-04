@@ -19,8 +19,7 @@ module "Frontend" {
   user_data            = local.frontend_user_data
   tags                 = var.frontend_tags
   security_group_id    = aws_security_group.FrontendSG.id
-  iam_instance_profile = aws_iam_role_policy.ec2_discovery_policy.name
-
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
 }
 
 resource "aws_vpc" "ThreeTierAppVPC" {
@@ -109,7 +108,7 @@ module "Backend" {
   user_data            = local.backend_user_data
   tags                 = var.backend_tags
   security_group_id    = aws_security_group.BackendSG.id
-  iam_instance_profile = aws_iam_role_policy.ec2_discovery_policy.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
 }
 
 resource "aws_subnet" "PrivateSubnet" {
@@ -382,24 +381,31 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+# Create IAM instance profile
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "ec2_discovery_profile"
+  role = aws_iam_role.ec2_role.name
+}
+
 ################################################
 #Monitoring
 ################################################
 
 
 module "CloudWatch" {
-  source              = "git::https://github.com/selelyriq/TF-Monitoring.git?ref=0f1366dcd24eb79a78d56b247e44e6b7446afc87"
+  source              = "git::https://github.com/selelyriq/TF-Monitoring.git?ref=7bbf520599080182e72a7120c8f2bd10f4631ac9"
   name                = var.name
   pattern             = var.pattern
   metric_name         = var.metric_name
-  namespace           = var.namespace
+  namespace           = "Custom/ThreeTierApp"
   value               = var.value
   alarm_name          = var.alarm_name
   comparison_operator = var.comparison_operator
   evaluation_periods  = var.evaluation_periods
   threshold           = var.threshold
   statistic           = var.statistic
-  log_group_name      = aws_cloudwatch_log_group.flow_logs.name
+  period              = 300  # 5 minutes in seconds
+  log_group_name      = "/custom/three-tier-app/cost-allocation"  # Using a different log group name
   retention_in_days   = var.retention_in_days
   tags                = var.cloudwatch_tags
 }
