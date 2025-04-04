@@ -393,7 +393,7 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 
 
 module "CloudWatch" {
-  source              = "git::https://github.com/selelyriq/TF-Monitoring.git?ref=7bbf520599080182e72a7120c8f2bd10f4631ac9"
+  source              = "git::https://github.com/selelyriq/TF-Monitoring.git?ref=29b084088b51a69884bc754ca1240e3a7d3a5891"
   name                = var.name
   pattern             = var.pattern
   metric_name         = var.metric_name
