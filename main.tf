@@ -1,5 +1,5 @@
 module "three_tier_us_east_1" {
-  source = "/Users/lyriqsele/Documents/Code/three-tier/modules/three-tier"
+  source = "./modules/three-tier"
   providers = {
     aws = aws.us_east_1
   }
