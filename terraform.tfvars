@@ -1,10 +1,20 @@
 ################################################
-#Frontend
+#Common Variables
 ################################################
 
-instance_type   = "t2.micro"
-frontend_ami_id = "ami-07f63a768d21af353"
-frontend_name   = "Frontend"
+instance_type = "t2.micro"
+engine        = "mysql"
+username      = "admin"
+
+################################################
+#Frontend Configuration
+################################################
+
+frontend_name = "Frontend"
+frontend_ami_ids = {
+  "us-east-1" = "ami-07f63a768d21af353"
+  "us-east-2" = "ami-0dc4d63a667057757" # Replace with actual us-east-2 AMI
+}
 frontend_tags = {
   Name        = "Frontend"
   Environment = "Production"
@@ -12,11 +22,14 @@ frontend_tags = {
 }
 
 ################################################
-#Backend
+#Backend Configuration
 ################################################
 
-backend_ami_id = "ami-07f63a768d21af353"
-backend_name   = "Backend"
+backend_name = "Backend"
+backend_ami_ids = {
+  "us-east-1" = "ami-07f63a768d21af353"
+  "us-east-2" = "ami-0dc4d63a667057757" # Replace with actual us-east-2 AMI
+}
 backend_tags = {
   Name        = "Backend"
   Environment = "Production"
@@ -24,14 +37,12 @@ backend_tags = {
 }
 
 ################################################
-#Database
+#Database Configuration
 ################################################
 
 identifier        = "three-tier-app"
-engine            = "mysql"
 instance_class    = "db.t3.micro"
 allocated_storage = 20
-username          = "admin"
 database_tags = {
   Name        = "Database"
   Environment = "Production"
@@ -47,7 +58,7 @@ backend_sg_description  = "Allow inbound HTTP traffic from frontend only"
 database_sg_description = "Allow inbound MySQL traffic from backend servers only"
 
 ################################################
-#CloudWatch
+#CloudWatch Configuration
 ################################################
 
 name                = "cost-allocation-filter"
@@ -70,7 +81,7 @@ cloudwatch_tags = {
 }
 
 ################################################
-#Dashboard
+#Dashboard Configuration
 ################################################
 
 dashboard_name = "ThreeTierAppDashboard"

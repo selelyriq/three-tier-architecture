@@ -34,12 +34,12 @@ variable "backend_tags" {
   type = map(string)
 }
 
-variable "frontend_ami_ids" {
-  type = map(string)
+variable "frontend_ami_id" {
+  type = string
 }
 
-variable "backend_ami_ids" {
-  type = map(string)
+variable "backend_ami_id" {
+  type = string
 }
 
 variable "database_tags" {
@@ -188,4 +188,3 @@ variable "period" {
 variable "dashboard_name" {
   type = string
 }
-
