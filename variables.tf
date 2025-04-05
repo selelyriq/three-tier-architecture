@@ -188,3 +188,4 @@ variable "period" {
 variable "dashboard_name" {
   type = string
 }
+

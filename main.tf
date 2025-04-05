@@ -431,6 +431,7 @@ resource "aws_cloudwatch_metric_alarm" "cost_allocation_tag_alarm" {
 
 resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
   dashboard_name = var.dashboard_name
+  depends_on     = [module.Frontend, module.Backend]
 
   dashboard_body = jsonencode({
     widgets = [
@@ -447,7 +448,7 @@ resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
               "AWS/EC2",
               "CPUUtilization",
               "InstanceId",
-              "var.frontend_instance_id"
+              module.Frontend.instance_id
             ]
           ]
           period = 300
@@ -469,7 +470,7 @@ resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
               "AWS/EC2",
               "CPUUtilization",
               "InstanceId",
-              "var.backend_instance_id"
+              module.Backend.instance_id
             ]
           ]
           period = 300
@@ -491,7 +492,7 @@ resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
               "AWS/RDS",
               "CPUUtilization",
               "DBInstanceIdentifier",
-              "var.identifier"
+              var.identifier
             ]
           ]
           period = 300
