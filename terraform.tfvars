@@ -68,3 +68,9 @@ cloudwatch_tags = {
   Environment = "Production"
   Project     = "ThreeTierApp"
 }
+
+################################################
+#Dashboard
+################################################
+
+dashboard_name = "ThreeTierAppDashboard"

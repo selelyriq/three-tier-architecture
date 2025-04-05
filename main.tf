@@ -425,4 +425,22 @@ resource "aws_cloudwatch_metric_alarm" "cost_allocation_tag_alarm" {
   period              = 300 # 5 minutes in seconds
 }
 
-##run pls
+################################################
+#Dashboard
+################################################
+
+# resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
+#   dashboard_name = "var.dashboard_name"
+#   dashboard_body = jsonencode({
+#     widgets = [
+#       {
+
+
+
+
+
+
+
+
+
+

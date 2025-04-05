@@ -184,3 +184,7 @@ variable "period" {
   description = "The period in seconds over which the metric is evaluated"
   default     = 300 # 5 minutes
 }
+
+variable "dashboard_name" {
+  type = string
+}
