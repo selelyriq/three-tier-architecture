@@ -407,7 +407,7 @@ resource "aws_cloudwatch_log_metric_filter" "cost_allocation_tag_filter" {
   metric_transformation {
     name      = var.metric_name
     namespace = "Custom/ThreeTierApp"
-    value     = var.value
+    value     = "1"
   }
 
   depends_on = [aws_cloudwatch_log_group.cost_allocation_tag_log_group]

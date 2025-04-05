@@ -50,11 +50,11 @@ database_sg_description = "Allow inbound MySQL traffic from backend servers only
 #CloudWatch
 ################################################
 
-name                = "CloudWatch"
-pattern             = ""
+name                = "cost-allocation-filter"
+pattern             = "[timestamp, requestid, field3, field4, cost=*]"
 metric_name         = "CostAllocationTag"
 namespace           = "ThreeTierApp/Metrics"
-value               = "CostAllocationTag"
+value               = "$.cost"
 alarm_name          = "CostAllocationTagAlarm"
 comparison_operator = "GreaterThanThreshold"
 evaluation_periods  = 1
