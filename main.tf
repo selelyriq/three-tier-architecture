@@ -429,6 +429,15 @@ resource "aws_cloudwatch_metric_alarm" "cost_allocation_tag_alarm" {
 #Dashboard
 ################################################
 
+# Add outputs to get instance IDs
+output "frontend_instance_id" {
+  value = module.Frontend.ec2_instance_id
+}
+
+output "backend_instance_id" {
+  value = module.Backend.ec2_instance_id
+}
+
 resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
   dashboard_name = var.dashboard_name
   depends_on     = [module.Frontend, module.Backend]
@@ -448,12 +457,12 @@ resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
               "AWS/EC2",
               "CPUUtilization",
               "InstanceId",
-              module.Frontend.instance_id
+              module.Frontend.ec2_instance_id
             ]
           ]
           period = 300
           stat   = "Average"
-          region = "us-east-1"
+          region = data.aws_region.current.name
           title  = "Frontend Instance Metrics"
         }
       },
@@ -470,12 +479,12 @@ resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
               "AWS/EC2",
               "CPUUtilization",
               "InstanceId",
-              module.Backend.instance_id
+              module.Backend.ec2_instance_id
             ]
           ]
           period = 300
           stat   = "Average"
-          region = "us-east-1"
+          region = data.aws_region.current.name
           title  = "Backend Instance Metrics"
         }
       },
