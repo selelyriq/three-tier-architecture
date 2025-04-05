@@ -429,11 +429,80 @@ resource "aws_cloudwatch_metric_alarm" "cost_allocation_tag_alarm" {
 #Dashboard
 ################################################
 
-# resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
-#   dashboard_name = "var.dashboard_name"
-#   dashboard_body = jsonencode({
-#     widgets = [
-#       {
+resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
+  dashboard_name = var.dashboard_name
+
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type   = "metric"
+        x      = 0
+        y      = 0
+        width  = 12
+        height = 6
+
+        properties = {
+          metrics = [
+            [
+              "AWS/EC2",
+              "CPUUtilization",
+              "InstanceId",
+              "var.frontend_instance_id"
+            ]
+          ]
+          period = 300
+          stat   = "Average"
+          region = "us-east-1"
+          title  = "Frontend Instance Metrics"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 7
+        width  = 12
+        height = 6
+
+        properties = {
+          metrics = [
+            [
+              "AWS/EC2",
+              "CPUUtilization",
+              "InstanceId",
+              "var.backend_instance_id"
+            ]
+          ]
+          period = 300
+          stat   = "Average"
+          region = "us-east-1"
+          title  = "Backend Instance Metrics"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 13
+        width  = 12
+        height = 6
+
+        properties = {
+          metrics = [
+            [
+              "AWS/RDS",
+              "CPUUtilization",
+              "DBInstanceIdentifier",
+              "var.identifier"
+            ]
+          ]
+          period = 300
+          stat   = "Average"
+          region = "us-east-1"
+          title  = "Database Instance Metrics"
+        }
+      }
+    ]
+  })
+}
 
 
 
