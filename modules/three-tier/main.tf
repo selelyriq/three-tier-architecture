@@ -224,7 +224,7 @@ resource "aws_db_subnet_group" "database_subnet_group" {
 }
 
 module "Database" {
-  source                    = "git::https://github.com/selelyriq/TF-RDS.git?ref=923b82d7b9afec5727cbe7d25cdb3fc01bace008"
+  source                    = "git::https://github.com/selelyriq/TF-RDS.git?ref=21513201c527b11bb3ec771fe5b7372bdf08ac9b"
   identifier                = var.identifier
   engine                    = var.engine
   instance_class            = var.instance_class
@@ -232,10 +232,11 @@ module "Database" {
   username                  = var.username
   tags                      = var.database_tags
   multi_az                  = true # Enable Multi-AZ deployment
-  subnet_ids                = [aws_subnet.PrivateSubnet1.id, aws_subnet.PrivateSubnet2.id]
+  db_subnet_group_name      = "three-tier-db-subnet-group"  # Match the name we created
   skip_final_snapshot       = true
   final_snapshot_identifier = "three-tier-app-final-snapshot"
   snapshot_identifier       = null
+
 }
 
 resource "aws_security_group" "DatabaseSG" {
