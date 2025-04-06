@@ -33,16 +33,18 @@ module "three_tier" {
   dashboard_name      = "${var.dashboard_name}-us-east-1"
 }
 
-# Optional: Route 53 for DNS failover
-resource "aws_route53_health_check" "frontend_health_check" {
-  ip_address        = module.three_tier.frontend_public_ip
-  port              = 80
-  type              = "HTTP"
-  resource_path     = "/"
-  failure_threshold = "3"
-  request_interval  = "30"
 
-  depends_on = [module.three_tier]
-}
+
+# # Optional: Route 53 for DNS failover
+# resource "aws_route53_health_check" "frontend_health_check" {
+#   ip_address        = module.three_tier.frontend_public_ip
+#   port              = 80
+#   type              = "HTTP"
+#   resource_path     = "/"
+#   failure_threshold = "3"
+#   request_interval  = "30"
+
+#   depends_on = [module.three_tier]
+# }
 
 #push
