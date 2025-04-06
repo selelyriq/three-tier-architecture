@@ -231,8 +231,8 @@ module "Database" {
   allocated_storage         = var.allocated_storage
   username                  = var.username
   tags                      = var.database_tags
-  multi_az                  = true                         # Enable Multi-AZ deployment
-  db_subnet_group_name      = "three-tier-db-subnet-group" # Match the name we created
+  multi_az                  = true                                           # Enable Multi-AZ deployment
+  db_subnet_group_name      = aws_db_subnet_group.database_subnet_group.name # Match the name we created
   skip_final_snapshot       = true
   final_snapshot_identifier = "three-tier-app-final-snapshot"
   snapshot_identifier       = null

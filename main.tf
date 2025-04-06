@@ -1,4 +1,4 @@
-module "three_tier_us_east_1" {
+module "three_tier" {
   source = "./modules/three-tier"
   providers = {
     aws = aws.us_east_1
@@ -34,11 +34,13 @@ module "three_tier_us_east_1" {
 }
 
 # Optional: Route 53 for DNS failover
-resource "aws_route53_health_check" "frontend_us_east_1" {
-  ip_address        = module.three_tier_us_east_1.frontend_public_ip
+resource "aws_route53_health_check" "frontend_health_check" {
+  ip_address        = module.three_tier.frontend_public_ip
   port              = 80
   type              = "HTTP"
   resource_path     = "/"
   failure_threshold = "3"
   request_interval  = "30"
+
+  depends_on = [module.three_tier]
 }
