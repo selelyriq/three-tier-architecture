@@ -43,6 +43,14 @@ module "three_tier" {
 #   }))
 # }
 
+########################################################
+# SCPs
+########################################################
+
+data "aws_organizations_organization" "root" {
+  provider = aws.us_east_1
+}
+
 resource "aws_organizations_policy" "scp-ec2-instance-type" {
   name        = "scp-ec2-instance-type"
   description = "SCP for three-tier"
@@ -51,7 +59,7 @@ resource "aws_organizations_policy" "scp-ec2-instance-type" {
 
 resource "aws_organizations_policy_attachment" "scp-ec2-instance-type-attachment" {
   policy_id = aws_organizations_policy.scp-ec2-instance-type.id
-  target_id = "o-zsopj63lcq" # Replace with your organization root ID, OU ID, or account ID
+  target_id = data.aws_organizations_organization.root.roots[0].id # Replace with your organization root ID, OU ID, or account ID
 }
 
 resource "aws_organizations_policy" "prevent_vpc_deletion" {
@@ -62,7 +70,7 @@ resource "aws_organizations_policy" "prevent_vpc_deletion" {
 
 resource "aws_organizations_policy_attachment" "prevent_vpc_deletion_attachment" {
   policy_id = aws_organizations_policy.prevent_vpc_deletion.id
-  target_id = "o-zsopj63lcq" # Replace with your organization root ID, OU ID, or account ID
+  target_id = data.aws_organizations_organization.root.roots[0].id # Replace with your organization root ID, OU ID, or account ID
 }
 
 # # Optional: Route 53 for DNS failover
