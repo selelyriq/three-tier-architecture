@@ -33,7 +33,37 @@ module "three_tier" {
   dashboard_name      = "${var.dashboard_name}-us-east-1"
 }
 
+# resource "aws_launch_template" "three_tier_launch_template" {
+#   name = "${var.name}-us-east-1"
+#   image_id = var.frontend_ami_ids["us-east-1"]
+#   instance_type = var.instance_type
+#   user_data = base64encode(templatefile("${path.module}/user-data.sh", {
+#     frontend_ami_id = var.frontend_ami_ids["us-east-1"]
+#     backend_ami_id = var.backend_ami_ids["us-east-1"]
+#   }))
+# }
 
+resource "aws_organizations_policy" "scp-ec2-instance-type" {
+  name        = "scp-ec2-instance-type"
+  description = "SCP for three-tier"
+  content     = data.aws_iam_policy_document.scp-ec2-instance-type.json
+}
+
+resource "aws_organizations_policy_attachment" "scp-ec2-instance-type-attachment" {
+  policy_id = aws_organizations_policy.scp-ec2-instance-type.id
+  target_id = "r-uwn3" # Replace with your organization root ID, OU ID, or account ID
+}
+
+resource "aws_organizations_policy" "prevent_vpc_deletion" {
+  name        = "prevent-vpc-deletion"
+  description = "SCP that prevents deletion of any VPC"
+  content     = data.aws_iam_policy_document.scp-prevent-vpc-deletion.json
+}
+
+resource "aws_organizations_policy_attachment" "prevent_vpc_deletion_attachment" {
+  policy_id = aws_organizations_policy.prevent_vpc_deletion.id
+  target_id = "r-uwn3" # Replace with your organization root ID, OU ID, or account ID
+}
 
 # # Optional: Route 53 for DNS failover
 # resource "aws_route53_health_check" "frontend_health_check" {

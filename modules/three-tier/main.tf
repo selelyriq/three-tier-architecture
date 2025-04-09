@@ -469,13 +469,6 @@ resource "aws_cloudwatch_metric_alarm" "cost_allocation_tag_alarm" {
 ################################################
 
 # Add outputs to get instance IDs
-output "frontend_instance_id" {
-  value = module.Frontend.ec2_instance_id
-}
-
-output "backend_instance_id" {
-  value = module.Backend.ec2_instance_id
-}
 
 resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
   dashboard_name = var.dashboard_name
