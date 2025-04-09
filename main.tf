@@ -51,7 +51,7 @@ resource "aws_organizations_policy" "scp-ec2-instance-type" {
 
 resource "aws_organizations_policy_attachment" "scp-ec2-instance-type-attachment" {
   policy_id = aws_organizations_policy.scp-ec2-instance-type.id
-  target_id = "r-uwn3" # Replace with your organization root ID, OU ID, or account ID
+  target_id = "o-zsopj63lcq" # Replace with your organization root ID, OU ID, or account ID
 }
 
 resource "aws_organizations_policy" "prevent_vpc_deletion" {
@@ -62,7 +62,7 @@ resource "aws_organizations_policy" "prevent_vpc_deletion" {
 
 resource "aws_organizations_policy_attachment" "prevent_vpc_deletion_attachment" {
   policy_id = aws_organizations_policy.prevent_vpc_deletion.id
-  target_id = "r-uwn3" # Replace with your organization root ID, OU ID, or account ID
+  target_id = "o-zsopj63lcq" # Replace with your organization root ID, OU ID, or account ID
 }
 
 # # Optional: Route 53 for DNS failover
