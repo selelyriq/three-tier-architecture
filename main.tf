@@ -48,7 +48,7 @@ resource "aws_organizations_policy" "scp-ec2-instance-type" {
 }
 
 resource "aws_organizations_policy_attachment" "scp-ec2-instance-type-attachment" {
-  count = 1
+  count     = 1
   policy_id = aws_organizations_policy.scp-ec2-instance-type.id
   target_id = data.aws_organizations_organization.root.roots[0].id # Replace with your organization root ID, OU ID, or account ID
 }
@@ -60,7 +60,7 @@ resource "aws_organizations_policy" "prevent_vpc_deletion" {
 }
 
 resource "aws_organizations_policy_attachment" "prevent_vpc_deletion_attachment" {
-  count = 1
+  count     = 1
   policy_id = aws_organizations_policy.prevent_vpc_deletion.id
   target_id = data.aws_organizations_organization.root.roots[0].id # Replace with your organization root ID, OU ID, or account ID
 }
