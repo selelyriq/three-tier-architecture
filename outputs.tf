@@ -1,11 +1,11 @@
 output "vpc_id" {
-  value = aws_vpc.ThreeTierAppVPC.id
+  value = module.three_tier.vpc_id
 }
 
 output "publicsubnet1_id" {
-  value = aws_subnet.PublicSubnet1.id
+  value = module.three_tier.publicsubnet1_id
 }
 
 output "publicsubnet2_id" {
-  value = aws_subnet.PublicSubnet2.id
+  value = module.three_tier.publicsubnet2_id
 }
