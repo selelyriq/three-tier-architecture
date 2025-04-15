@@ -65,4 +65,3 @@ resource "aws_organizations_policy_attachment" "prevent_vpc_deletion_attachment"
   target_id = data.aws_organizations_organization.root.roots[0].id # Replace with your organization root ID, OU ID, or account ID
 }
 
-#hi
