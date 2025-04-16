@@ -386,7 +386,7 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
-# Update IAM policy for EC2 to include both discovery and CloudWatch permissions
+# Update IAM policy for EC2 to include both SSM discovery and CloudWatch permissions
 resource "aws_iam_role_policy" "ec2_discovery_policy" {
   name = "ec2_discovery_policy"
   role = aws_iam_role.ec2_role.id
@@ -397,8 +397,8 @@ resource "aws_iam_role_policy" "ec2_discovery_policy" {
       {
         Effect = "Allow"
         Action = [
+          "AmazonSSMManagedInstanceCore",
           "ec2:DescribeInstances",
-          "rds:DescribeDBInstances",
           "cloudwatch:PutMetricData",
           "cloudwatch:GetMetricData",
           "cloudwatch:GetMetricStatistics",
