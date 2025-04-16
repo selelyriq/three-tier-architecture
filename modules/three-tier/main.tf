@@ -397,7 +397,6 @@ resource "aws_iam_role_policy" "ec2_discovery_policy" {
       {
         Effect = "Allow"
         Action = [
-          "AmazonSSMManagedInstanceCore",
           "ec2:DescribeInstances",
           "cloudwatch:PutMetricData",
           "cloudwatch:GetMetricData",
@@ -414,10 +413,10 @@ resource "aws_iam_role_policy" "ec2_discovery_policy" {
   })
 }
 
-# Add CloudWatch Agent policy attachment to the existing EC2 role
-resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
+# Attach the managed policy separately
+resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
   role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 # Create IAM instance profile
@@ -546,3 +545,4 @@ resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
   })
 }
 
+#hi
