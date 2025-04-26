@@ -546,7 +546,7 @@ resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
 }
 
 data "aws_iam_role" "existing_role" {
-  name = "your-existing-role-name"  # Or use ARN with arn attribute instead
+  name = "your-existing-role-name" # Or use ARN with arn attribute instead
 }
 
 resource "aws_iam_instance_profile" "existing_profile" {
