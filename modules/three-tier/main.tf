@@ -19,7 +19,7 @@ module "Frontend" {
   user_data            = local.frontend_user_data
   tags                 = var.frontend_tags
   security_group_id    = aws_security_group.FrontendSG.id
-  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+  iam_instance_profile = aws_iam_instance_profile.existing_profile.name
 }
 
 resource "aws_vpc" "ThreeTierAppVPC" {
@@ -121,7 +121,7 @@ module "Backend" {
   user_data            = local.backend_user_data
   tags                 = var.backend_tags
   security_group_id    = aws_security_group.BackendSG.id
-  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+  iam_instance_profile = aws_iam_instance_profile.existing_profile.name
 }
 
 # Private Subnets in two AZs
@@ -545,4 +545,12 @@ resource "aws_cloudwatch_dashboard" "three_tier_app_dashboard" {
   })
 }
 
-#hi
+data "aws_iam_role" "existing_role" {
+  name = "your-existing-role-name"  # Or use ARN with arn attribute instead
+}
+
+resource "aws_iam_instance_profile" "existing_profile" {
+  name = "imported-role-profile"
+  role = data.aws_iam_role.existing_role.name
+}
+
