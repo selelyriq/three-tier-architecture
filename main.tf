@@ -1,9 +1,17 @@
 data "aws_ami" "my_ami" {
-  most_recent = true
-  name_regex  = "myami*"
   owners      = ["self"]
-}
+  most_recent = true
 
+  filter {
+    name   = "name"
+    values = ["myami-production-1.0.0-*"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+}
 resource "aws_instance" "ec2_instance" {
   ami                    = data.aws_ami.my_ami.id
   instance_type          = "t2.micro"
