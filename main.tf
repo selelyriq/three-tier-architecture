@@ -16,7 +16,7 @@ resource "aws_instance" "ec2_instance" {
   ami                    = data.aws_ami.my_ami.id
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.allow_ssh.id, aws_security_group.allow_https.id]
-  subnet_id              = aws_subnet.public_subnet.id
+  subnet_id              = aws_subnet.demo_subnet.id
   iam_instance_profile   = data.aws_iam_instance_profile.demo_instance_profile.name
 }
 
@@ -70,7 +70,7 @@ resource "aws_vpc" "my_vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
-resource "aws_subnet" "public_subnet" {
+resource "aws_subnet" "demo_subnet" {
   vpc_id     = aws_vpc.my_vpc.id
   cidr_block = "10.0.1.0/24"
 }
